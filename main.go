@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -44,7 +45,8 @@ func main() {
 
 	// Routes
 	e.GET("/", status)
-
+	e.GET("/items", GetAll)
+	e.POST("/items", CreateItem)
 	// Start server
 	address := fmt.Sprintf("%s:%s", config.Get("host").(string), config.Get("port").(string))
 	e.Logger.Fatal(e.Start(address))
@@ -53,4 +55,31 @@ func main() {
 
 func status(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{"status": true, "message": "api works!s"})
+}
+
+func GetAll(c echo.Context) error {
+	context := context.Background()
+
+	data, err := database.FindAll(context)
+	if err != nil {
+		return c.JSON(http.StatusOK, echo.Map{"status": false, "message": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, data)
+}
+
+func CreateItem(c echo.Context) error {
+	context := context.Background()
+	data := &schema.CreateItemParams{}
+	err := c.Bind(data)
+
+	if err != nil {
+		return c.JSON(http.StatusOK, echo.Map{"status": false, "message": err.Error()})
+	}
+
+	response := database.CreateItem(context, *data)
+	if response != nil {
+		return c.JSON(http.StatusOK, echo.Map{"status": false, "message": err.Error()})
+	}
+	return c.JSON(http.StatusOK, echo.Map{"status": true, "message": "Resource created"})
 }

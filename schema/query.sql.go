@@ -13,8 +13,8 @@ INSERT INTO item (p_name, price) VALUES ($1,$2)
 `
 
 type CreateItemParams struct {
-	PName sql.NullString `json:"p_name"`
-	Price sql.NullString `json:"price"`
+	PName string `json:"p_name"`
+	Price string `json:"price"`
 }
 
 func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) error {
